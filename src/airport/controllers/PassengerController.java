@@ -21,6 +21,110 @@ public class PassengerController {
     public PassengerController() throws Exception {
         this.passengerStorage = PassengerStorage.getInstance();
     }
+    
+    public Response updatePassenger(
+        String idText,
+        String firstName,
+        String lastName,
+        String yearText,
+        String monthText,
+        String dayText,
+        String phoneCodeText,
+        String phoneText,
+        String country
+    ) {
+        try {
+            // Validación de campos vacíos
+            if (idText == null || idText.trim().isEmpty() ||
+                firstName == null || firstName.trim().isEmpty() ||
+                lastName == null  || lastName.trim().isEmpty()  ||
+                yearText == null  || yearText.trim().isEmpty()  ||
+                monthText == null || monthText.trim().isEmpty() ||
+                dayText == null   || dayText.trim().isEmpty()   ||
+                phoneCodeText == null || phoneCodeText.trim().isEmpty() ||
+                phoneText == null || phoneText.trim().isEmpty() ||
+                country == null   || country.trim().isEmpty()) {
+                return new Response("Todos los campos son obligatorios.", Status.BAD_REQUEST);
+            }
+
+            // ID válido
+            long id;
+            try {
+                id = Long.parseLong(idText.trim());
+                if (id <= 0) {
+                    return new Response("El ID debe ser un número positivo.", Status.BAD_REQUEST);
+                }
+            } catch (NumberFormatException e) {
+                return new Response("ID inválido.", Status.BAD_REQUEST);
+            }
+
+            // Buscar pasajero existente
+            Passenger passenger = passengerStorage.getPassengerById(id);
+            if (passenger == null) {
+                return new Response("No se encontró el pasajero con ese ID.", Status.NOT_FOUND);
+            }
+
+            // Fecha de nacimiento válida
+            LocalDate birthDate;
+            try {
+                int year = Integer.parseInt(yearText.trim());
+                int month = Integer.parseInt(monthText.trim());
+                int day = Integer.parseInt(dayText.trim());
+
+                birthDate = LocalDate.of(year, month, day);
+
+                LocalDate hoy = LocalDate.now();
+                if (birthDate.isAfter(hoy)) {
+                    return new Response("La fecha de nacimiento no puede ser en el futuro.", Status.BAD_REQUEST);
+                }
+                if (year < 1900) {
+                    return new Response("El año de nacimiento es demasiado antiguo.", Status.BAD_REQUEST);
+                }
+            } catch (Exception e) {
+                return new Response("Fecha de nacimiento inválida.", Status.BAD_REQUEST);
+            }
+
+            // Código de región válido
+            int phoneCode;
+            try {
+                phoneCode = Integer.parseInt(phoneCodeText.trim());
+                if (phoneCode <= 0) {
+                    return new Response("Código de región inválido.", Status.BAD_REQUEST);
+                }
+            } catch (NumberFormatException e) {
+                return new Response("Código de región inválido.", Status.BAD_REQUEST);
+            }
+
+            // Teléfono válido
+            long phone;
+            try {
+                phone = Long.parseLong(phoneText.trim());
+                if (phone <= 0) {
+                    return new Response("Número de teléfono inválido.", Status.BAD_REQUEST);
+                }
+            } catch (NumberFormatException e) {
+                return new Response("Número de teléfono inválido.", Status.BAD_REQUEST);
+            }
+
+            // País válido
+            if (country.trim().isEmpty()) {
+                return new Response("El país es obligatorio.", Status.BAD_REQUEST);
+            }
+
+            // Actualizar datos
+            passenger.setFirstname(firstName.trim());
+            passenger.setLastname(lastName.trim());
+            passenger.setBirthDate(birthDate);
+            passenger.setCountryPhoneCode(phoneCode);
+            passenger.setPhone(phone);
+            passenger.setCountry(country.trim());
+
+            return new Response("Pasajero actualizado exitosamente.", Status.OK, passenger);
+
+        } catch (Exception ex) {
+            return new Response("Error inesperado: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     public Response registerPassenger(
         String idText, 

@@ -1676,32 +1676,49 @@ public class AirportFrame extends javax.swing.JFrame {
     }
 
     private void UpdateInfo_UpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateInfo_UpdateButtonActionPerformed
-        // TODO add your handling code here:
-        long id = Long.parseLong(UpdateInfo_IdTextField.getText());
-        String firstname = UpdateInfo_FirstNameTextField.getText();
-        String lastname = UpdateInfo_LastNameTextField.getText();
-        int year = Integer.parseInt(UpdateInfo_YearTextField.getText());
-        int month = Integer.parseInt(PassangerRegistration_ChooseMonth.getItemAt(UpdateInfo_MonthTextField.getSelectedIndex()));
-        int day = Integer.parseInt(PassangerRegistration_ChooseDay.getItemAt(UpdateInfo_DayTextField.getSelectedIndex()));
-        int phoneCode = Integer.parseInt(UpdateInfo_NumberCodeTextField.getText());
-        long phone = Long.parseLong(UpdateInfo_NumberTextField.getText());
-        String country = UpdateInfo_CountryTextField.getText();
+try {
+    PassengerController controller = new PassengerController();
 
-        LocalDate birthDate = LocalDate.of(year, month, day);
+    String idText = UpdateInfo_IdTextField.getText();
+    String firstName = UpdateInfo_FirstNameTextField.getText();
+    String lastName = UpdateInfo_LastNameTextField.getText();
+    String yearText = UpdateInfo_YearTextField.getText();
+    String monthText = String.valueOf(UpdateInfo_MonthTextField.getSelectedItem());
+    String dayText = String.valueOf(UpdateInfo_DayTextField.getSelectedItem());
+    String phoneCodeText = UpdateInfo_NumberCodeTextField.getText();
+    String phoneText = UpdateInfo_NumberTextField.getText();
+    String country = UpdateInfo_CountryTextField.getText();
 
-        Passenger passenger = null;
-        for (Passenger p : this.passengers) {
-            if (p.getId() == id) {
-                passenger = p;
-            }
-        }
+    Response response = controller.updatePassenger(
+        idText,
+        firstName,
+        lastName,
+        yearText,
+        monthText,
+        dayText,
+        phoneCodeText,
+        phoneText,
+        country
+    );
 
-        passenger.setFirstname(firstname);
-        passenger.setLastname(lastname);
-        passenger.setBirthDate(birthDate);
-        passenger.setCountryPhoneCode(phoneCode);
-        passenger.setPhone(phone);
-        passenger.setCountry(country);
+    if (response.getStatus() == Status.OK) {
+        JOptionPane.showMessageDialog(this, "Pasajero actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        UpdateInfo_IdTextField.setText("");
+        UpdateInfo_FirstNameTextField.setText("");
+        UpdateInfo_LastNameTextField.setText("");
+        UpdateInfo_YearTextField.setText("");
+        UpdateInfo_MonthTextField.setSelectedIndex(0);
+        UpdateInfo_DayTextField.setSelectedIndex(0);
+        UpdateInfo_NumberCodeTextField.setText("");
+        UpdateInfo_NumberTextField.setText("");
+        UpdateInfo_CountryTextField.setText("");
+    } else {
+        JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+} catch (Exception e) {
+    JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    e.printStackTrace();
+}
     }//GEN-LAST:event_UpdateInfo_UpdateButtonActionPerformed
 
     private void AddToFlight_AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddToFlight_AddButtonActionPerformed

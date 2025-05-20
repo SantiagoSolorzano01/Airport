@@ -3,21 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/controllers/PassengerController.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/storages/JsonFileManager.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/Flight.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/Plane.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/Location.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/Passenger.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/storages/PlaneStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/storages/LocationStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/storages/FlightStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/models/storages/PassengerStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/Main/Main.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/views/AirportFrame.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/controllers/FlightController.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/controllers/PlaneController.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport_SSD/src/airport/controllers/LocationController.java</file>
+            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/nbproject/private/private.xml</file>
+            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/airport/models/Passenger.java</file>
+            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/airport/controllers/PassengerController.java</file>
         </group>
     </open-files>
 </project-private>
