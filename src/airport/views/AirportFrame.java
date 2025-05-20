@@ -1506,29 +1506,36 @@ public class AirportFrame extends javax.swing.JFrame {
     }
 
     private void AirplaneRegistration_CreateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AirplaneRegistration_CreateButtonActionPerformed
-        try {
-            PlaneController controller = new PlaneController();
+    try {
+        String id = AirplaneRegistration_IdTextField.getText();
+        String brand = AirplaneRegistration_BrandTextField.getText();
+        String model = AirplaneRegistration_ModelTextField.getText();
+        String maxCapacity = AirplaneRegistration_MaxCapacityTextField.getText();
+        String airline = AirplaneRegistration_AirlineTextField.getText();
 
-            Response response = controller.registerPlane(
-                    AirplaneRegistration_IdTextField.getText(),
-                    AirplaneRegistration_BrandTextField.getText(),
-                    AirplaneRegistration_ModelTextField.getText(),
-                    AirplaneRegistration_MaxCapacityTextField.getText(),
-                    AirplaneRegistration_AirlineTextField.getText()
-            );
+        PlaneController controller = new PlaneController();
+        Response response = controller.registerPlane(
+            id,
+            brand,
+            model,
+            maxCapacity,
+            airline
+        );
 
-            if (response.getStatus() == Status.CREATED) {
-                Plane newPlane = (Plane) response.getObject();
-                FlightRegistration_ChoosePlane.addItem(newPlane.getId());
-                clearAirplaneRegistrationForm();
-                JOptionPane.showMessageDialog(this, "Avión registrado exitosamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+        if (response.getStatus() == Status.CREATED) {
+            JOptionPane.showMessageDialog(this, "Avión registrado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            AirplaneRegistration_IdTextField.setText("");
+            AirplaneRegistration_BrandTextField.setText("");
+            AirplaneRegistration_ModelTextField.setText("");
+            AirplaneRegistration_MaxCapacityTextField.setText("");
+            AirplaneRegistration_AirlineTextField.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
     }//GEN-LAST:event_AirplaneRegistration_CreateButtonActionPerformed
     private void clearAirplaneRegistrationForm() {
         AirplaneRegistration_IdTextField.setText("");
