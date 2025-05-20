@@ -97,4 +97,13 @@ public class FlightStorage {
             return false;
         }
     }
+    public boolean updateFlight(Flight updatedFlight) {
+        for (int i = 0; i < flights.size(); i++) {
+            if (flights.get(i).getId().equals(updatedFlight.getId())) {
+                flights.set(i, updatedFlight);
+                return true;
+            }
+        }
+        return false;
+    }
 }

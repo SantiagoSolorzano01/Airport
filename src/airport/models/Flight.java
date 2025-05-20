@@ -98,11 +98,6 @@ public class Flight {
     public Plane getPlane() {
         return plane;
     }
-
-    public void setDepartureDate(LocalDateTime departureDate) {
-        this.departureDate = departureDate;
-    }
-    
     public LocalDateTime calculateArrivalDate() {
         return departureDate.plusHours(hoursDurationScale).plusHours(hoursDurationArrival).plusMinutes(minutesDurationScale).plusMinutes(minutesDurationArrival);
     }
@@ -114,5 +109,11 @@ public class Flight {
     public int getNumPassengers() {
         return passengers.size();
     }
+
+    public ArrayList<Passenger> getPassengers() {
+        return passengers;
+    }
+    
+    
     
 }

@@ -15,6 +15,7 @@ import airport.models.storages.PlaneStorage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 /**
  *
@@ -155,5 +156,70 @@ public class FlightController {
         } catch (Exception e) {
             return new Response("Error inesperado: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
+    }
+    public Response delayFlight(String flightId, String hoursStr, String minutesStr) {
+        try {
+            // Validación 1: Campos obligatorios
+            if (flightId == null || flightId.trim().isEmpty()) {
+                return new Response("Debe seleccionar un vuelo", Status.BAD_REQUEST);
+            }
+
+            // Validación 2: Formato numérico
+            int hours, minutes;
+            try {
+                hours = Integer.parseInt(hoursStr);
+                minutes = Integer.parseInt(minutesStr);
+            } catch (NumberFormatException e) {
+                return new Response("Horas y minutos deben ser números válidos", Status.BAD_REQUEST);
+            }
+
+            // Validación 3: Rango de valores
+            if (hours < 0 || hours > 48) {
+                return new Response("Las horas de retraso deben estar entre 0 y 48", Status.BAD_REQUEST);
+            }
+            if (minutes < 0 || minutes >= 60) {
+                return new Response("Los minutos deben estar entre 0 y 59", Status.BAD_REQUEST);
+            }
+            if (hours == 0 && minutes == 0) {
+                return new Response("No se ha especificado retraso", Status.BAD_REQUEST);
+            }
+
+            // Obtener el vuelo
+            Flight flight = flightStorage.getFlightById(flightId);
+            if (flight == null) {
+                return new Response("Vuelo no encontrado", Status.NOT_FOUND);
+            }
+
+            // Validación 4: No retrasar vuelos pasados
+            if (flight.getDepartureDate().isBefore(LocalDateTime.now())) {
+                return new Response("No se puede retrasar un vuelo que ya ha partido", Status.BAD_REQUEST);
+            }
+
+            // Aplicar el retraso
+            flight.delay(hours, minutes);
+            
+            // Actualizar en el storage
+            if (flightStorage.updateFlight(flight)) {
+                String newDeparture = flight.getDepartureDate()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                String newArrival = flight.calculateArrivalDate()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                
+                return new Response(
+                    String.format("Vuelo retrasado:<br>• Nueva salida: %s<br>• Nueva llegada: %s", 
+                        newDeparture, newArrival),
+                    Status.OK,
+                    flight
+                );
+            } else {
+                return new Response("Error al guardar los cambios", Status.INTERNAL_SERVER_ERROR);
+            }
+            
+        } catch (Exception e) {
+            return new Response("Error inesperado: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+    public List<Flight> getAllFlights() {
+        return flightStorage.getAllFlights(); // Asume que FlightStorage tiene este método
     }
 }

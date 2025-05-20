@@ -14,15 +14,18 @@ import airport.models.Flight;
 import airport.models.Location;
 import airport.models.Passenger;
 import airport.models.Plane;
+import airport.models.storages.FlightStorage;
 import airport.models.storages.LocationStorage;
 import airport.models.storages.PassengerStorage;
 import airport.models.storages.PlaneStorage;
 import java.awt.Color;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -41,9 +44,10 @@ public class AirportFrame extends javax.swing.JFrame {
     private ArrayList<Location> locations;
     private ArrayList<Flight> flights;
 
-    public AirportFrame() {
+    public AirportFrame() throws Exception {
         initComponents();
         loadFlightFormData(); // Cargar IDs al iniciar
+        loadFlightIds();
         this.passengers = new ArrayList<>();
         this.planes = new ArrayList<>();
         this.locations = new ArrayList<>();
@@ -1602,11 +1606,12 @@ public class AirportFrame extends javax.swing.JFrame {
 
             if (response.getStatus() == Status.CREATED) {
                 // Registro exitoso
+                refreshFlightLists();
                 Flight newFlight = (Flight) response.getObject();
                 AddToFlight_ChooseFlight.addItem(newFlight.getId());
                 clearFlightRegistrationForm();
                 System.out.println("Vuelo registrado: Avion: " + newFlight.getPlane().getId() + "DepartureID: " + newFlight.getDepartureLocation().getAirportId() + "ArrivalID: "
-                + newFlight.getArrivalLocation().getAirportId() + "ScaleID: " + newFlight.getScaleLocation().getAirportId());
+                        + newFlight.getArrivalLocation().getAirportId() + "ScaleID: " + newFlight.getScaleLocation().getAirportId());
                 JOptionPane.showMessageDialog(this, "Vuelo registrado exitosamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -1633,6 +1638,7 @@ public class AirportFrame extends javax.swing.JFrame {
         FlightRegistration_Duration2Minute.setSelectedIndex(0);
         FlightRegistration_IdTextField.requestFocus();
     }
+
     private void loadFlightFormData() {
         try {
             // Limpiar ComboBoxes
@@ -1721,23 +1727,67 @@ public class AirportFrame extends javax.swing.JFrame {
         passenger.addFlight(flight);
         flight.addPassenger(passenger);
     }//GEN-LAST:event_AddToFlight_AddButtonActionPerformed
+    private void loadFlightIds() throws Exception {
+        FlightController controller = new FlightController();
+        List<Flight> flights = controller.getAllFlights(); // Asume que tienes este método
 
-    private void DelayFlight_DelayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DelayFlight_DelayButtonActionPerformed
-        // TODO add your handling code here:
-        String flightId = DelayFlight_ChooseId.getItemAt(DelayFlight_ChooseId.getSelectedIndex());
-        int hours = Integer.parseInt(DelayFlight_ChooseHour.getItemAt(DelayFlight_ChooseHour.getSelectedIndex()));
-        int minutes = Integer.parseInt(DelayFlight_ChooseMinute.getItemAt(DelayFlight_ChooseMinute.getSelectedIndex()));
+        DelayFlight_ChooseId.removeAllItems(); // Limpiar items existentes
 
-        Flight flight = null;
-        for (Flight f : this.flights) {
-            if (flightId.equals(f.getId())) {
-                flight = f;
-            }
+        for (Flight flight : flights) {
+            DelayFlight_ChooseId.addItem(flight.getId());
         }
+    }
+    
+    private void DelayFlight_DelayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DelayFlight_DelayButtonActionPerformed
+        try {
+            // Obtener parámetros del formulario
+            String flightId = (String) DelayFlight_ChooseId.getSelectedItem();
+            int hours = Integer.parseInt(DelayFlight_ChooseHour.getSelectedItem().toString());
+            int minutes = Integer.parseInt(DelayFlight_ChooseMinute.getSelectedItem().toString());
 
-        flight.delay(hours, minutes);
+            // Usar el controlador
+            FlightController controller = new FlightController();
+            Response response = controller.delayFlight(flightId, String.valueOf(hours), String.valueOf(minutes));
+
+            // Manejar la respuesta
+            if (response.getStatus() == Status.OK) {
+                JOptionPane.showMessageDialog(this,
+                        response.getMessage(),
+                        "Retraso aplicado",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                // Actualizar la lista de vuelos en la interfaz
+                refreshFlightLists();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        response.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Horas y minutos deben ser números válidos",
+                    "Error de formato",
+                    JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error inesperado: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_DelayFlight_DelayButtonActionPerformed
+    private void refreshFlightLists() throws Exception {
+        loadFlightIds();
+        // Actualizar ComboBox de selección de vuelos
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        FlightStorage.getInstance().getAllFlights()
+                .forEach(f -> model.addElement(f.getId()));
+        DelayFlight_ChooseId.setModel(model);
 
+        // Actualizar otras vistas que muestren vuelos si es necesario
+        ShowAllFlights_RefreshButtonActionPerformed(null);
+    }
     private void ShowMyFlights_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowMyFlights_RefreshButtonActionPerformed
         // TODO add your handling code here:
         long passengerId = Long.parseLong(Administration_SelectUser.getItemAt(Administration_SelectUser.getSelectedIndex()));
@@ -1758,38 +1808,118 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ShowMyFlights_RefreshButtonActionPerformed
 
     private void ShowAllPassengers_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowAllPassengers_RefreshButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) ShowAllPassengers_Table.getModel();
-        model.setRowCount(0);
-        for (Passenger passenger : this.passengers) {
-            model.addRow(new Object[]{passenger.getId(), passenger.getFullname(), passenger.getBirthDate(), passenger.calculateAge(), passenger.generateFullPhone(), passenger.getCountry(), passenger.getNumFlights()});
+        try {
+            DefaultTableModel model = (DefaultTableModel) ShowAllPassengers_Table.getModel();
+            model.setRowCount(0); // Limpiar tabla
+
+            // Obtener pasajeros desde el Storage (no de this.passengers)
+            List<Passenger> passengers = PassengerStorage.getInstance().getAllPassengers();
+
+            // Formateador de fecha
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            for (Passenger passenger : passengers) {
+                model.addRow(new Object[]{
+                    passenger.getId(),
+                    passenger.getFirstname() + " " + passenger.getLastname(), // o passenger.getFullname() si existe
+                    passenger.getBirthDate().format(dateFormatter), // Fecha formateada
+                    passenger.calculateAge(), // Asumiendo que existe este método
+                    "+" + passenger.getCountryPhoneCode() + " " + passenger.getPhone(),
+                    passenger.getCountry(),
+                    passenger.getFlights().size() // Número de vuelos
+                });
+            }
+
+            // Opcional: Mostrar mensaje si no hay pasajeros
+            if (passengers.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No hay pasajeros registrados", "Información", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar pasajeros: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }//GEN-LAST:event_ShowAllPassengers_RefreshButtonActionPerformed
 
     private void ShowAllFlights_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowAllFlights_RefreshButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) ShowAllFlights_Table.getModel();
-        model.setRowCount(0);
-        for (Flight flight : this.flights) {
-            model.addRow(new Object[]{flight.getId(), flight.getDepartureLocation().getAirportId(), flight.getArrivalLocation().getAirportId(), (flight.getScaleLocation() == null ? "-" : flight.getScaleLocation().getAirportId()), flight.getDepartureDate(), flight.calculateArrivalDate(), flight.getPlane().getId(), flight.getNumPassengers()});
+        try {
+            DefaultTableModel model = (DefaultTableModel) ShowAllFlights_Table.getModel();
+            model.setRowCount(0);
+
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            for (Flight flight : FlightStorage.getInstance().getAllFlights()) {
+                model.addRow(new Object[]{
+                    flight.getId(),
+                    flight.getDepartureLocation().getAirportId(),
+                    flight.getArrivalLocation().getAirportId(),
+                    (flight.getScaleLocation() == null ? "-"
+                    : flight.getScaleLocation().getAirportId()),
+                    flight.getDepartureDate().format(dateFormatter),
+                    flight.calculateArrivalDate().format(dateFormatter),
+                    flight.getPlane().getId(),
+                    flight.getPassengers().size()
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar vuelos: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }//GEN-LAST:event_ShowAllFlights_RefreshButtonActionPerformed
 
     private void ShowAllPlanes_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowAllPlanes_RefreshButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) ShowAllPlanes_Table.getModel();
-        model.setRowCount(0);
-        for (Plane plane : this.planes) {
-            model.addRow(new Object[]{plane.getId(), plane.getBrand(), plane.getModel(), plane.getMaxCapacity(), plane.getAirline(), plane.getNumFlights()});
+        try {
+            DefaultTableModel model = (DefaultTableModel) ShowAllPlanes_Table.getModel();
+            model.setRowCount(0);
+
+            for (Plane plane : PlaneStorage.getInstance().getAllPlanes()) {
+                model.addRow(new Object[]{
+                    plane.getId(),
+                    plane.getBrand(),
+                    plane.getModel(),
+                    plane.getMaxCapacity(),
+                    plane.getAirline(),
+                    plane.getFlights().size(),
+                    (plane.getFlights().size() > 0
+                    ? String.format("%.1f%%", (double) plane.getFlights().size() / plane.getMaxCapacity() * 100) : "0%")
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar aviones: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }//GEN-LAST:event_ShowAllPlanes_RefreshButtonActionPerformed
 
     private void ShowAllLocations_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowAllLocations_RefreshButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) ShowAllLocations_Table.getModel();
-        model.setRowCount(0);
-        for (Location location : this.locations) {
-            model.addRow(new Object[]{location.getAirportId(), location.getAirportName(), location.getAirportCity(), location.getAirportCountry()});
+        try {
+            DefaultTableModel model = (DefaultTableModel) ShowAllLocations_Table.getModel();
+            model.setRowCount(0);
+
+            for (Location location : LocationStorage.getInstance().getAllLocations()) {
+                model.addRow(new Object[]{
+                    location.getAirportId(),
+                    location.getAirportName(),
+                    location.getAirportCity(),
+                    location.getAirportCountry(),
+                    String.format("%.6f, %.6f", location.getAirportLatitude(), location.getAirportLongitude()),
+                    location.getDepartureFlights().size() + location.getArrivalFlights().size()
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar ubicaciones: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }//GEN-LAST:event_ShowAllLocations_RefreshButtonActionPerformed
 
