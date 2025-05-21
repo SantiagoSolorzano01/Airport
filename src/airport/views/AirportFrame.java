@@ -115,8 +115,8 @@ public class AirportFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        panelRound1 = new airport.models.PanelRound();
-        panelRound2 = new airport.models.PanelRound();
+        panelRound1 = new airport.views.PanelRound();
+        panelRound2 = new airport.views.PanelRound();
         ClosePageButton = new javax.swing.JButton();
         PrincipalPanel = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
@@ -253,7 +253,7 @@ public class AirportFrame extends javax.swing.JFrame {
         DelayFlight_MinutesLabel = new javax.swing.JLabel();
         DelayFlight_ChooseMinute = new javax.swing.JComboBox<>();
         DelayFlight_DelayButton = new javax.swing.JButton();
-        panelRound3 = new airport.models.PanelRound();
+        panelRound3 = new airport.views.PanelRound();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -2110,9 +2110,9 @@ try {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
-    private airport.models.PanelRound panelRound1;
-    private airport.models.PanelRound panelRound2;
-    private airport.models.PanelRound panelRound3;
+    private airport.views.PanelRound panelRound1;
+    private airport.views.PanelRound panelRound2;
+    private airport.views.PanelRound panelRound3;
     // End of variables declaration//GEN-END:variables
 
 }

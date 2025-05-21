@@ -3,9 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/nbproject/private/private.xml</file>
-            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/airport/models/Passenger.java</file>
-            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/airport/controllers/PassengerController.java</file>
+            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/airport/views/AirportFrame.java</file>
+            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/Main/Main.java</file>
+            <file>file:/C:/Users/glopr/OneDrive/Escritorio/Airport/src/airport/controllers/PlaneController.java</file>
         </group>
     </open-files>
 </project-private>

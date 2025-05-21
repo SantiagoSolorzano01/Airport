@@ -11,8 +11,8 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
+
 public class Plane {
-    
     private final String id;
     private String brand;
     private String model;
@@ -21,6 +21,9 @@ public class Plane {
     private ArrayList<Flight> flights;
 
     public Plane(String id, String brand, String model, int maxCapacity, String airline) {
+        if (!id.matches("^[A-Z]{3}[0-9]{3}$")) {
+            throw new IllegalArgumentException("El ID debe tener el formato 'AAA111' (3 letras mayúsculas seguidas de 3 números)");
+        }
         this.id = id;
         this.brand = brand;
         this.model = model;
@@ -28,7 +31,6 @@ public class Plane {
         this.airline = airline;
         this.flights = new ArrayList<>();
     }
-
     public void addFlight(Flight flight) {
         this.flights.add(flight);
     }
