@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -48,6 +49,7 @@ public class AirportFrame extends javax.swing.JFrame {
         initComponents();
         loadFlightFormData(); // Cargar IDs al iniciar
         loadFlightIds();
+        updateFlightLists();
         this.passengers = new ArrayList<>();
         this.planes = new ArrayList<>();
         this.locations = new ArrayList<>();
@@ -1477,6 +1479,10 @@ public class AirportFrame extends javax.swing.JFrame {
         if (response.getStatus() == Status.CREATED) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
             Passenger newPassenger = (Passenger) response.getObject();
+            // Obtener todos los IDs ordenados
+            List<Passenger> sortedPassengers = controller.getAllPassengersSorted();
+            // Actualizar el JComboBox
+            updatePassengerComboBox(sortedPassengers);
             this.Administration_SelectUser.addItem("" + newPassenger.getId());
             clearPassengerRegistrationForm();
 
@@ -1491,6 +1497,14 @@ public class AirportFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_PassangerRegistration_RegisterButtonActionPerformed
+    private void updatePassengerComboBox(List<Passenger> passengers) {
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        for (Passenger p : passengers) {
+            model.addElement(String.valueOf(p.getId()));
+        }
+        this.Administration_SelectUser.setModel(model);
+    }
+
     private void clearPassengerRegistrationForm() {
         // Limpiar todos los campos del formulario
         // Limpiar todos los campos del formulario
@@ -1506,37 +1520,54 @@ public class AirportFrame extends javax.swing.JFrame {
     }
 
     private void AirplaneRegistration_CreateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AirplaneRegistration_CreateButtonActionPerformed
-    try {
-        String id = AirplaneRegistration_IdTextField.getText();
-        String brand = AirplaneRegistration_BrandTextField.getText();
-        String model = AirplaneRegistration_ModelTextField.getText();
-        String maxCapacity = AirplaneRegistration_MaxCapacityTextField.getText();
-        String airline = AirplaneRegistration_AirlineTextField.getText();
+        try {
+            String id = AirplaneRegistration_IdTextField.getText();
+            String brand = AirplaneRegistration_BrandTextField.getText();
+            String model = AirplaneRegistration_ModelTextField.getText();
+            String maxCapacity = AirplaneRegistration_MaxCapacityTextField.getText();
+            String airline = AirplaneRegistration_AirlineTextField.getText();
 
-        PlaneController controller = new PlaneController();
-        Response response = controller.registerPlane(
-            id,
-            brand,
-            model,
-            maxCapacity,
-            airline
-        );
+            PlaneController controller = new PlaneController();
+            Response response = controller.registerPlane(
+                    id,
+                    brand,
+                    model,
+                    maxCapacity,
+                    airline
+            );
 
-        if (response.getStatus() == Status.CREATED) {
-            JOptionPane.showMessageDialog(this, "Avión registrado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            AirplaneRegistration_IdTextField.setText("");
-            AirplaneRegistration_BrandTextField.setText("");
-            AirplaneRegistration_ModelTextField.setText("");
-            AirplaneRegistration_MaxCapacityTextField.setText("");
-            AirplaneRegistration_AirlineTextField.setText("");
-        } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            if (response.getStatus() == Status.CREATED) {
+                JOptionPane.showMessageDialog(this, "Avión registrado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                clearAirplaneRegistrationForm();
+                List<Plane> sortedPlanes = controller.getAllPlanesSorted();
+                updatePlaneComboBox(sortedPlanes);
+            } else {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-    }
     }//GEN-LAST:event_AirplaneRegistration_CreateButtonActionPerformed
+    //Actualiza un JComboBox con los IDs de aviones ordenados (formato AB12345)
+
+    private void updatePlaneComboBox(List<Plane> sortedPlanes) {
+        try {
+            PlaneController controller = new PlaneController();
+            List<Plane> sortedPlanes1 = controller.getAllPlanesSorted();
+
+            DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+            for (Plane plane : sortedPlanes1) {
+                model.addElement(plane.getId());
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al actualizar lista de aviones: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void clearAirplaneRegistrationForm() {
         AirplaneRegistration_IdTextField.setText("");
         AirplaneRegistration_BrandTextField.setText("");
@@ -1561,6 +1592,10 @@ public class AirportFrame extends javax.swing.JFrame {
 
             if (response.getStatus() == Status.CREATED) {
                 Location newLocation = (Location) response.getObject();
+                // Obtener todas las ubicaciones ordenadas
+                List<Location> sortedLocations = controller.getAllLocationsSorted();
+                // Actualizar los combos
+                updateLocationCombos(sortedLocations);
                 // Agregar a los combos de vuelos
                 FlightRegistration_ChooseDepartureLocation.addItem(newLocation.getAirportId());
                 FlightRegistration_ChooseArrivalLocation.addItem(newLocation.getAirportId());
@@ -1576,6 +1611,20 @@ public class AirportFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }//GEN-LAST:event_LocationRegistration_CreateButtonActionPerformed
+    // Método para actualizar los combos de ubicaciones
+
+    private void updateLocationCombos(List<Location> locations) {
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        for (Location loc : locations) {
+            model.addElement(loc.getAirportId());
+        }
+
+        // Aplicar el mismo modelo ordenado a todos los combos
+        FlightRegistration_ChooseDepartureLocation.setModel(model);
+        FlightRegistration_ChooseArrivalLocation.setModel(model);
+        FlightRegistration_ChooseScaleLocation.setModel(model);
+    }
+
     private void clearLocationRegistrationForm() {
         LocationRegistration_IdTextField.setText("");
         LocationRegistration_NameTextField.setText("");
@@ -1617,6 +1666,7 @@ public class AirportFrame extends javax.swing.JFrame {
                 Flight newFlight = (Flight) response.getObject();
                 AddToFlight_ChooseFlight.addItem(newFlight.getId());
                 clearFlightRegistrationForm();
+                updateFlightLists(); // Actualizar las listas ordenadas
                 System.out.println("Vuelo registrado: Avion: " + newFlight.getPlane().getId() + "DepartureID: " + newFlight.getDepartureLocation().getAirportId() + "ArrivalID: "
                         + newFlight.getArrivalLocation().getAirportId() + "ScaleID: " + newFlight.getScaleLocation().getAirportId());
                 JOptionPane.showMessageDialog(this, "Vuelo registrado exitosamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -1628,6 +1678,31 @@ public class AirportFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }//GEN-LAST:event_FlightRegistration_CreateButtonActionPerformed
+    private void updateFlightLists() {
+        try {
+            FlightController controller = new FlightController();
+            List<Flight> sortedFlights = controller.getAllFlightsSorted();
+
+            // Actualizar el comboBox de selección de vuelos
+            DefaultComboBoxModel<String> flightModel = new DefaultComboBoxModel<>();
+            for (Flight flight : sortedFlights) {
+                String displayText = String.format("%s - %s a %s (%s)",
+                        flight.getId(),
+                        flight.getDepartureLocation().getAirportId(),
+                        flight.getArrivalLocation().getAirportId(),
+                        flight.getDepartureDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                flightModel.addElement(displayText);
+            }
+            AddToFlight_ChooseFlight.setModel(flightModel);
+
+            // Si tienes otras listas/tablas de vuelos, actualízalas aquí también
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al actualizar lista de vuelos: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void clearFlightRegistrationForm() {
         FlightRegistration_IdTextField.setText("");
         FlightRegistration_Year.setText("");
@@ -1683,49 +1758,49 @@ public class AirportFrame extends javax.swing.JFrame {
     }
 
     private void UpdateInfo_UpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateInfo_UpdateButtonActionPerformed
-try {
-    PassengerController controller = new PassengerController();
+        try {
+            PassengerController controller = new PassengerController();
 
-    String idText = UpdateInfo_IdTextField.getText();
-    String firstName = UpdateInfo_FirstNameTextField.getText();
-    String lastName = UpdateInfo_LastNameTextField.getText();
-    String yearText = UpdateInfo_YearTextField.getText();
-    String monthText = String.valueOf(UpdateInfo_MonthTextField.getSelectedItem());
-    String dayText = String.valueOf(UpdateInfo_DayTextField.getSelectedItem());
-    String phoneCodeText = UpdateInfo_NumberCodeTextField.getText();
-    String phoneText = UpdateInfo_NumberTextField.getText();
-    String country = UpdateInfo_CountryTextField.getText();
+            String idText = UpdateInfo_IdTextField.getText();
+            String firstName = UpdateInfo_FirstNameTextField.getText();
+            String lastName = UpdateInfo_LastNameTextField.getText();
+            String yearText = UpdateInfo_YearTextField.getText();
+            String monthText = String.valueOf(UpdateInfo_MonthTextField.getSelectedItem());
+            String dayText = String.valueOf(UpdateInfo_DayTextField.getSelectedItem());
+            String phoneCodeText = UpdateInfo_NumberCodeTextField.getText();
+            String phoneText = UpdateInfo_NumberTextField.getText();
+            String country = UpdateInfo_CountryTextField.getText();
 
-    Response response = controller.updatePassenger(
-        idText,
-        firstName,
-        lastName,
-        yearText,
-        monthText,
-        dayText,
-        phoneCodeText,
-        phoneText,
-        country
-    );
+            Response response = controller.updatePassenger(
+                    idText,
+                    firstName,
+                    lastName,
+                    yearText,
+                    monthText,
+                    dayText,
+                    phoneCodeText,
+                    phoneText,
+                    country
+            );
 
-    if (response.getStatus() == Status.OK) {
-        JOptionPane.showMessageDialog(this, "Pasajero actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        UpdateInfo_IdTextField.setText("");
-        UpdateInfo_FirstNameTextField.setText("");
-        UpdateInfo_LastNameTextField.setText("");
-        UpdateInfo_YearTextField.setText("");
-        UpdateInfo_MonthTextField.setSelectedIndex(0);
-        UpdateInfo_DayTextField.setSelectedIndex(0);
-        UpdateInfo_NumberCodeTextField.setText("");
-        UpdateInfo_NumberTextField.setText("");
-        UpdateInfo_CountryTextField.setText("");
-    } else {
-        JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-} catch (Exception e) {
-    JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    e.printStackTrace();
-}
+            if (response.getStatus() == Status.OK) {
+                JOptionPane.showMessageDialog(this, "Pasajero actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                UpdateInfo_IdTextField.setText("");
+                UpdateInfo_FirstNameTextField.setText("");
+                UpdateInfo_LastNameTextField.setText("");
+                UpdateInfo_YearTextField.setText("");
+                UpdateInfo_MonthTextField.setSelectedIndex(0);
+                UpdateInfo_DayTextField.setSelectedIndex(0);
+                UpdateInfo_NumberCodeTextField.setText("");
+                UpdateInfo_NumberTextField.setText("");
+                UpdateInfo_CountryTextField.setText("");
+            } else {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_UpdateInfo_UpdateButtonActionPerformed
 
     private void AddToFlight_AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddToFlight_AddButtonActionPerformed
@@ -1761,7 +1836,7 @@ try {
             DelayFlight_ChooseId.addItem(flight.getId());
         }
     }
-    
+
     private void DelayFlight_DelayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DelayFlight_DelayButtonActionPerformed
         try {
             // Obtener parámetros del formulario
@@ -1833,16 +1908,20 @@ try {
 
     private void ShowAllPassengers_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowAllPassengers_RefreshButtonActionPerformed
         try {
+            PassengerController controller = new PassengerController();
             DefaultTableModel model = (DefaultTableModel) ShowAllPassengers_Table.getModel();
             model.setRowCount(0); // Limpiar tabla
 
             // Obtener pasajeros desde el Storage (no de this.passengers)
-            List<Passenger> passengers = PassengerStorage.getInstance().getAllPassengers();
-
+            //List<Passenger> passengers = PassengerStorage.getInstance().getAllPassengers();
+            // Obtener todos los IDs ordenados
+            List<Passenger> sortedPassengers = controller.getAllPassengersSorted();
+            // Actualizar el JComboBox
+            updatePassengerComboBox(sortedPassengers);
             // Formateador de fecha
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            for (Passenger passenger : passengers) {
+            for (Passenger passenger : sortedPassengers) {
                 model.addRow(new Object[]{
                     passenger.getId(),
                     passenger.getFirstname() + " " + passenger.getLastname(), // o passenger.getFullname() si existe
@@ -1855,7 +1934,7 @@ try {
             }
 
             // Opcional: Mostrar mensaje si no hay pasajeros
-            if (passengers.isEmpty()) {
+            if (sortedPassengers.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No hay pasajeros registrados", "Información", JOptionPane.INFORMATION_MESSAGE);
             }
 

@@ -5,6 +5,7 @@ import airport.models.Location;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class LocationStorage {
@@ -14,6 +15,7 @@ public class LocationStorage {
 
     private LocationStorage() throws Exception {
         this.locations = loadFromJson();
+        sortLocations();
     }
 
     public static LocationStorage getInstance() throws Exception {
@@ -22,7 +24,10 @@ public class LocationStorage {
         }
         return instance;
     }
-
+    // Método para ordenar las ubicaciones por ID
+    private void sortLocations() {
+        locations.sort(Comparator.comparing(Location::getAirportId));
+    }
     private List<Location> loadFromJson() throws Exception {
         List<Location> locations = new ArrayList<>();
         JSONArray jsonArray = JsonFileManager.readJsonArray(FILENAME);
@@ -59,8 +64,8 @@ public class LocationStorage {
                 System.err.println("Error: ID de ubicación duplicado detectado en Storage");
                 return false;
             }
-            
             locations.add(newLocation);
+            sortLocations(); // Ordenar después de añadir
             System.out.println("Ubicación añadida (sin persistencia JSON aún): " + newLocation.getAirportId());
             return true;
             

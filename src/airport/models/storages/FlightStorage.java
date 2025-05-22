@@ -12,9 +12,11 @@ import org.json.JSONObject;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class FlightStorage {
+
     private static FlightStorage instance;
     private List<Flight> flights;
     private static final String FILENAME = "flights.json";
@@ -31,6 +33,11 @@ public class FlightStorage {
         return instance;
     }
 
+    // Método para ordenar vuelos por fecha de salida
+    private void sortFlights() {
+        this.flights.sort(Comparator.comparing(Flight::getDepartureDate));
+    }
+
     private List<Flight> loadFromJson() throws Exception {
         List<Flight> flights = new ArrayList<>();
         JSONArray jsonArray = JsonFileManager.readJsonArray(FILENAME);
@@ -39,7 +46,7 @@ public class FlightStorage {
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject json = jsonArray.getJSONObject(i);
-            
+
             Plane plane = planeStorage.getPlaneById(json.getString("plane"));
             Location departureLoc = locationStorage.getLocationById(json.getString("departureLocation"));
             Location arrivalLoc = locationStorage.getLocationById(json.getString("arrivalLocation"));
@@ -47,27 +54,27 @@ public class FlightStorage {
             Flight flight;
             if (json.isNull("scaleLocation")) {
                 flight = new Flight(
-                    json.getString("id"),
-                    plane,
-                    departureLoc,
-                    arrivalLoc,
-                    LocalDateTime.parse(json.getString("departureDate"), DATE_FORMATTER),
-                    json.getInt("hoursDurationArrival"),
-                    json.getInt("minutesDurationArrival")
+                        json.getString("id"),
+                        plane,
+                        departureLoc,
+                        arrivalLoc,
+                        LocalDateTime.parse(json.getString("departureDate"), DATE_FORMATTER),
+                        json.getInt("hoursDurationArrival"),
+                        json.getInt("minutesDurationArrival")
                 );
             } else {
                 Location scaleLoc = locationStorage.getLocationById(json.getString("scaleLocation"));
                 flight = new Flight(
-                    json.getString("id"),
-                    plane,
-                    departureLoc,
-                    scaleLoc,
-                    arrivalLoc,
-                    LocalDateTime.parse(json.getString("departureDate"), DATE_FORMATTER),
-                    json.getInt("hoursDurationArrival"),
-                    json.getInt("minutesDurationArrival"),
-                    json.getInt("hoursDurationScale"),
-                    json.getInt("minutesDurationScale")
+                        json.getString("id"),
+                        plane,
+                        departureLoc,
+                        scaleLoc,
+                        arrivalLoc,
+                        LocalDateTime.parse(json.getString("departureDate"), DATE_FORMATTER),
+                        json.getInt("hoursDurationArrival"),
+                        json.getInt("minutesDurationArrival"),
+                        json.getInt("hoursDurationScale"),
+                        json.getInt("minutesDurationScale")
                 );
             }
             flights.add(flight);
@@ -77,9 +84,9 @@ public class FlightStorage {
 
     public Flight getFlightById(String id) {
         return flights.stream()
-            .filter(flight -> flight.getId().equals(id))
-            .findFirst()
-            .orElse(null);
+                .filter(flight -> flight.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     public List<Flight> getAllFlights() {
@@ -89,14 +96,16 @@ public class FlightStorage {
     public boolean addFlight(Flight newFlight) {
         try {
             flights.add(newFlight);
+            sortFlights(); // Ordenar después de añadir
             System.out.println("Vuelo añadido (sin persistencia JSON aún): " + newFlight.getId());
             return true;
-            
+
         } catch (Exception e) {
             System.err.println("Error al añadir vuelo: " + e.getMessage());
             return false;
         }
     }
+
     public boolean updateFlight(Flight updatedFlight) {
         for (int i = 0; i < flights.size(); i++) {
             if (flights.get(i).getId().equals(updatedFlight.getId())) {
@@ -105,5 +114,11 @@ public class FlightStorage {
             }
         }
         return false;
+    }
+    // Método para obtener vuelos ya ordenados
+
+    public List<Flight> getAllFlightsSorted() {
+        sortFlights(); // Asegurar que estén ordenados
+        return new ArrayList<>(flights);
     }
 }

@@ -12,6 +12,7 @@ import airport.models.Plane;
 import airport.models.storages.FlightStorage;
 import airport.models.storages.LocationStorage;
 import airport.models.storages.PlaneStorage;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -35,6 +36,10 @@ public class FlightController {
         this.locationStorage = LocationStorage.getInstance();
     }
 
+    public List<Flight> getAllFlightsSorted() throws Exception {
+        return flightStorage.getAllFlightsSorted();
+    }
+
     public Response registerFlight(
             String flightId,
             String planeId,
@@ -52,24 +57,34 @@ public class FlightController {
             String minsScale
     ) {
         try {
-            // Validación de campos obligatorios
-            if (flightId == null || flightId.trim().isEmpty()) {
-                return new Response("El ID de vuelo es obligatorio", Status.BAD_REQUEST);
+            // 1. Validación de campos obligatorios
+            if (flightId == null || flightId.trim().isEmpty()
+                    || planeId == null || planeId.trim().isEmpty()
+                    || departureLocId == null || departureLocId.trim().isEmpty()
+                    || arrivalLocId == null || arrivalLocId.trim().isEmpty()
+                    || year == null || year.trim().isEmpty()
+                    || month == null || month.trim().isEmpty()
+                    || day == null || day.trim().isEmpty()
+                    || hour == null || hour.trim().isEmpty()
+                    || minute == null || minute.trim().isEmpty()
+                    || hoursArrival == null || hoursArrival.trim().isEmpty()
+                    || minsArrival == null || minsArrival.trim().isEmpty()) {
+                return new Response("Todos los campos obligatorios deben estar completos", Status.BAD_REQUEST);
             }
 
-            if (planeId == null || planeId.trim().isEmpty()) {
-                return new Response("Debe seleccionar un avión", Status.BAD_REQUEST);
+            // 2. Validación de formato del ID del vuelo (XXXYYY)
+            if (flightId.length() != 6 || !flightId.matches("^[A-Z]{3}\\d{3}$")) {
+                return new Response("El ID del vuelo debe seguir el formato XXXYYY donde:\n"
+                        + "- XXX son 3 letras mayúsculas\n"
+                        + "- YYY son 3 dígitos numéricos", Status.BAD_REQUEST);
             }
 
-            if (departureLocId == null || departureLocId.trim().isEmpty()) {
-                return new Response("Debe seleccionar ubicación de salida", Status.BAD_REQUEST);
+            // 3. Validación de unicidad de ID
+            if (flightStorage.getFlightById(flightId) != null) {
+                return new Response("El ID de vuelo ya existe", Status.BAD_REQUEST);
             }
 
-            if (arrivalLocId == null || arrivalLocId.trim().isEmpty()) {
-                return new Response("Debe seleccionar ubicación de llegada", Status.BAD_REQUEST);
-            }
-
-            // Validación de fechas y horas
+            // 4. Validación de fecha y hora de salida
             LocalDateTime departureDate;
             try {
                 int y = Integer.parseInt(year);
@@ -83,33 +98,46 @@ public class FlightController {
                 if (departureDate.isBefore(LocalDateTime.now())) {
                     return new Response("La fecha de salida no puede ser en el pasado", Status.BAD_REQUEST);
                 }
-            } catch (Exception e) {
-                return new Response("Fecha u hora inválidas", Status.BAD_REQUEST);
+            } catch (DateTimeException e) {
+                return new Response("Fecha u hora de salida inválidas", Status.BAD_REQUEST);
+            } catch (NumberFormatException e) {
+                return new Response("Los valores de fecha y hora deben ser números válidos", Status.BAD_REQUEST);
             }
 
-            // Validación de duraciones
-            int hoursArr, minsArr, hoursSc = 0, minsSc = 0;
+            // 5. Validación de duración del vuelo
+            int hoursArr, minsArr;
             try {
                 hoursArr = Integer.parseInt(hoursArrival);
                 minsArr = Integer.parseInt(minsArrival);
 
+                if (hoursArr <= 0 && minsArr <= 0) {
+                    return new Response("La duración del vuelo debe ser mayor a 00:00", Status.BAD_REQUEST);
+                }
                 if (hoursArr < 0 || minsArr < 0 || minsArr >= 60) {
                     return new Response("Duración de vuelo inválida", Status.BAD_REQUEST);
                 }
+            } catch (NumberFormatException e) {
+                return new Response("Las duraciones deben ser números válidos", Status.BAD_REQUEST);
+            }
 
-                if (scaleLocId != null && !scaleLocId.trim().isEmpty()) {
+            // 6. Validación de escala (opcional)
+            int hoursSc = 0, minsSc = 0;
+            boolean hasScale = scaleLocId != null && !scaleLocId.trim().isEmpty();
+
+            if (hasScale) {
+                try {
                     hoursSc = Integer.parseInt(hoursScale);
                     minsSc = Integer.parseInt(minsScale);
 
                     if (hoursSc < 0 || minsSc < 0 || minsSc >= 60) {
                         return new Response("Duración de escala inválida", Status.BAD_REQUEST);
                     }
+                } catch (NumberFormatException e) {
+                    return new Response("Las duraciones de escala deben ser números válidos", Status.BAD_REQUEST);
                 }
-            } catch (NumberFormatException e) {
-                return new Response("Las duraciones deben ser números válidos", Status.BAD_REQUEST);
             }
 
-            // Obtener objetos completos
+            // 7. Validación de objetos referenciados
             Plane plane = planeStorage.getPlaneById(planeId);
             if (plane == null) {
                 return new Response("Avión no encontrado", Status.NOT_FOUND);
@@ -122,14 +150,9 @@ public class FlightController {
                 return new Response("Ubicación no encontrada", Status.NOT_FOUND);
             }
 
-            // Validación de unicidad de ID
-            if (flightStorage.getFlightById(flightId) != null) {
-                return new Response("El ID de vuelo ya existe", Status.BAD_REQUEST);
-            }
-
-            // Crear el vuelo
+            // 8. Crear el vuelo
             Flight newFlight;
-            if (scaleLocId == null || scaleLocId.trim().isEmpty()) {
+            if (!hasScale) {
                 newFlight = new Flight(
                         flightId, plane, departure, arrival,
                         departureDate, hoursArr, minsArr
@@ -146,7 +169,7 @@ public class FlightController {
                 );
             }
 
-            // Guardar el vuelo
+            // 9. Guardar el vuelo
             if (flightStorage.addFlight(newFlight)) {
                 return new Response("Vuelo registrado exitosamente", Status.CREATED, newFlight);
             } else {
@@ -157,6 +180,7 @@ public class FlightController {
             return new Response("Error inesperado: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
+
     public Response delayFlight(String flightId, String hoursStr, String minutesStr) {
         try {
             // Validación 1: Campos obligatorios
@@ -197,28 +221,29 @@ public class FlightController {
 
             // Aplicar el retraso
             flight.delay(hours, minutes);
-            
+
             // Actualizar en el storage
             if (flightStorage.updateFlight(flight)) {
                 String newDeparture = flight.getDepartureDate()
-                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
                 String newArrival = flight.calculateArrivalDate()
-                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-                
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
                 return new Response(
-                    String.format("Vuelo retrasado:<br>• Nueva salida: %s<br>• Nueva llegada: %s", 
-                        newDeparture, newArrival),
-                    Status.OK,
-                    flight
+                        String.format("Vuelo retrasado:<br>• Nueva salida: %s<br>• Nueva llegada: %s",
+                                newDeparture, newArrival),
+                        Status.OK,
+                        flight
                 );
             } else {
                 return new Response("Error al guardar los cambios", Status.INTERNAL_SERVER_ERROR);
             }
-            
+
         } catch (Exception e) {
             return new Response("Error inesperado: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
+
     public List<Flight> getAllFlights() {
         return flightStorage.getAllFlights(); // Asume que FlightStorage tiene este método
     }

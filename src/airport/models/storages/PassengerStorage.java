@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class PassengerStorage {
@@ -59,7 +60,10 @@ public class PassengerStorage {
         }
         return passengers;
     }
-
+    private void sortPassengersById() {
+        passengers.sort(Comparator.comparingLong(Passenger::getId));
+    }
+    
     public Passenger getPassengerById(long id) {
         return passengers.stream()
                 .filter(p -> p.getId() == id)
@@ -75,6 +79,7 @@ public class PassengerStorage {
         try {
             // Solo añade a la lista 
             passengers.add(newPassenger);
+            sortPassengersById();  // Ordenar después de añadir
             System.out.println("Pasajero añadido: " + newPassenger.getFirstname() + " con el id: " + newPassenger.getId());
             return true;
         } catch (Exception e) {
@@ -82,5 +87,9 @@ public class PassengerStorage {
             return false;
         }
     }
-
+    // Método público para obtener pasajeros ordenados (opcional)
+    public List<Passenger> getAllPassengersSortedById() {
+        sortPassengersById();
+        return new ArrayList<>(passengers);
+    }
 }
