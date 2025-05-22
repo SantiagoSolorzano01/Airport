@@ -432,7 +432,7 @@ public class AirportFrame extends javax.swing.JFrame {
         AirplaneRegistration_BrandLabel.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         AirplaneRegistration_BrandLabel.setText("Brand:");
         jPanel3.add(AirplaneRegistration_BrandLabel);
-        AirplaneRegistration_BrandLabel.setBounds(53, 157, 50, 25);
+        AirplaneRegistration_BrandLabel.setBounds(53, 157, 52, 25);
 
         AirplaneRegistration_BrandTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(AirplaneRegistration_BrandTextField);
@@ -445,7 +445,7 @@ public class AirportFrame extends javax.swing.JFrame {
         AirplaneRegistration_ModelLabel.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         AirplaneRegistration_ModelLabel.setText("Model:");
         jPanel3.add(AirplaneRegistration_ModelLabel);
-        AirplaneRegistration_ModelLabel.setBounds(53, 216, 55, 25);
+        AirplaneRegistration_ModelLabel.setBounds(53, 216, 57, 25);
 
         AirplaneRegistration_MaxCapacityTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(AirplaneRegistration_MaxCapacityTextField);
@@ -454,7 +454,7 @@ public class AirportFrame extends javax.swing.JFrame {
         AirplaneRegistration_MaxCapacityLabel.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         AirplaneRegistration_MaxCapacityLabel.setText("Max Capacity:");
         jPanel3.add(AirplaneRegistration_MaxCapacityLabel);
-        AirplaneRegistration_MaxCapacityLabel.setBounds(53, 276, 109, 25);
+        AirplaneRegistration_MaxCapacityLabel.setBounds(53, 276, 114, 25);
 
         AirplaneRegistration_AirlineTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(AirplaneRegistration_AirlineTextField);
@@ -603,6 +603,11 @@ public class AirportFrame extends javax.swing.JFrame {
 
         FlightRegistration_ChooseArrivalLocation.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         FlightRegistration_ChooseArrivalLocation.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Location" }));
+        FlightRegistration_ChooseArrivalLocation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FlightRegistration_ChooseArrivalLocationActionPerformed(evt);
+            }
+        });
 
         FlightRegistration_ArrivalLocationLabel.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         FlightRegistration_ArrivalLocationLabel.setText("Arrival location:");
@@ -1636,47 +1641,56 @@ public class AirportFrame extends javax.swing.JFrame {
     }
 
     private void FlightRegistration_CreateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FlightRegistration_CreateButtonActionPerformed
-        try {
-            FlightController controller = new FlightController();
+try {
+    FlightController controller = new FlightController();
 
-            // Obtener los valores seleccionados
-            String scaleLocId = (FlightRegistration_ChooseScaleLocation.getSelectedIndex() >= 0)
-                    ? FlightRegistration_ChooseScaleLocation.getSelectedItem().toString() : null;
+    // Obtener los valores seleccionados
+    String scaleLocId = (FlightRegistration_ChooseScaleLocation.getSelectedIndex() >= 0)
+            ? FlightRegistration_ChooseScaleLocation.getSelectedItem().toString() : null;
 
-            Response response = controller.registerFlight(
-                    FlightRegistration_IdTextField.getText().trim(),
-                    FlightRegistration_ChoosePlane.getSelectedItem().toString(),
-                    FlightRegistration_ChooseDepartureLocation.getSelectedItem().toString(),
-                    FlightRegistration_ChooseArrivalLocation.getSelectedItem().toString(),
-                    scaleLocId,
-                    FlightRegistration_Year.getText(),
-                    FlightRegistration_ChooseMonth.getSelectedItem().toString(),
-                    FlightRegistration_ChooseDay.getSelectedItem().toString(),
-                    FlightRegistration_DepartureDateHour.getSelectedItem().toString(),
-                    FlightRegistration_DepartureDateMinute.getSelectedItem().toString(),
-                    FlightRegistration_Duration1Hour.getSelectedItem().toString(),
-                    FlightRegistration_Duration1Minute.getSelectedItem().toString(),
-                    scaleLocId != null ? FlightRegistration_Duration2Hour.getSelectedItem().toString() : "0",
-                    scaleLocId != null ? FlightRegistration_Duration2Minute.getSelectedItem().toString() : "0"
-            );
+    Response response = controller.registerFlight(
+            FlightRegistration_IdTextField.getText().trim(),
+            FlightRegistration_ChoosePlane.getSelectedItem().toString(),
+            FlightRegistration_ChooseDepartureLocation.getSelectedItem().toString(),
+            FlightRegistration_ChooseArrivalLocation.getSelectedItem().toString(),
+            scaleLocId,
+            FlightRegistration_Year.getText(),
+            FlightRegistration_ChooseMonth.getSelectedItem().toString(),
+            FlightRegistration_ChooseDay.getSelectedItem().toString(),
+            FlightRegistration_DepartureDateHour.getSelectedItem().toString(),
+            FlightRegistration_DepartureDateMinute.getSelectedItem().toString(),
+            FlightRegistration_Duration1Hour.getSelectedItem().toString(),
+            FlightRegistration_Duration1Minute.getSelectedItem().toString(),
+            scaleLocId != null ? FlightRegistration_Duration2Hour.getSelectedItem().toString() : "0",
+            scaleLocId != null ? FlightRegistration_Duration2Minute.getSelectedItem().toString() : "0"
+    );
 
-            if (response.getStatus() == Status.CREATED) {
-                // Registro exitoso
-                refreshFlightLists();
-                Flight newFlight = (Flight) response.getObject();
-                AddToFlight_ChooseFlight.addItem(newFlight.getId());
-                clearFlightRegistrationForm();
-                updateFlightLists(); // Actualizar las listas ordenadas
-                System.out.println("Vuelo registrado: Avion: " + newFlight.getPlane().getId() + "DepartureID: " + newFlight.getDepartureLocation().getAirportId() + "ArrivalID: "
-                        + newFlight.getArrivalLocation().getAirportId() + "ScaleID: " + newFlight.getScaleLocation().getAirportId());
-                JOptionPane.showMessageDialog(this, "Vuelo registrado exitosamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+    if (response.getStatus() == Status.CREATED) {
+        // Registro exitoso
+        refreshFlightLists();
+        Flight newFlight = (Flight) response.getObject();
+        AddToFlight_ChooseFlight.addItem(newFlight.getId());
+        clearFlightRegistrationForm();
+        updateFlightLists(); // Actualizar las listas ordenadas
+
+        // Corrección: proteger acceso a la escala
+        String scaleId = (newFlight.getScaleLocation() != null)
+                ? newFlight.getScaleLocation().getAirportId()
+                : "Sin escala";
+
+        System.out.println("Vuelo registrado: Avion: " + newFlight.getPlane().getId()
+            + " DepartureID: " + newFlight.getDepartureLocation().getAirportId()
+            + " ArrivalID: " + newFlight.getArrivalLocation().getAirportId()
+            + " ScaleID: " + scaleId);
+
+        JOptionPane.showMessageDialog(this, "Vuelo registrado exitosamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    } else {
+        JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+} catch (Exception e) {
+    JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    e.printStackTrace();
+}
     }//GEN-LAST:event_FlightRegistration_CreateButtonActionPerformed
     private void updateFlightLists() {
         try {
@@ -2047,6 +2061,10 @@ public class AirportFrame extends javax.swing.JFrame {
     private void FlightRegistration_IdTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FlightRegistration_IdTextFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_FlightRegistration_IdTextFieldActionPerformed
+
+    private void FlightRegistration_ChooseArrivalLocationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FlightRegistration_ChooseArrivalLocationActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_FlightRegistration_ChooseArrivalLocationActionPerformed
 
     /**
      * @param args the command line arguments

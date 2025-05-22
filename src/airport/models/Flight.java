@@ -99,7 +99,12 @@ public class Flight {
     }
 
     public LocalDateTime calculateArrivalDate() {
-        return departureDate.plusHours(hoursDurationScale).plusHours(hoursDurationArrival).plusMinutes(minutesDurationScale).plusMinutes(minutesDurationArrival);
+        LocalDateTime arrival = departureDate;
+        if (scaleLocation != null) {
+            arrival = arrival.plusHours(hoursDurationScale).plusMinutes(minutesDurationScale);
+        }
+        arrival = arrival.plusHours(hoursDurationArrival).plusMinutes(minutesDurationArrival);
+        return arrival;
     }
 
     public void delay(int hours, int minutes) {
