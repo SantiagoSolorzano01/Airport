@@ -120,20 +120,37 @@ public class FlightController {
                 return new Response("Las duraciones deben ser números válidos", Status.BAD_REQUEST);
             }
 
-            // 6. Validación de escala (opcional)
-            int hoursSc = 0, minsSc = 0;
+            // 6. Validación de escala (nuevas validaciones)
             boolean hasScale = scaleLocId != null && !scaleLocId.trim().isEmpty();
+            int hoursSc = 0, minsSc = 0;
 
             if (hasScale) {
+                // Validar que se proporcionaron valores para la escala
+                if (hoursScale == null || hoursScale.trim().isEmpty()
+                        || minsScale == null || minsScale.trim().isEmpty()) {
+                    return new Response("Debe especificar la duración de la escala", Status.BAD_REQUEST);
+                }
+
                 try {
                     hoursSc = Integer.parseInt(hoursScale);
                     minsSc = Integer.parseInt(minsScale);
+
+                    // Validar que la duración de escala no sea cero
+                    if (hoursSc == 0 && minsSc == 0) {
+                        return new Response("La duración de la escala no puede ser 00:00", Status.BAD_REQUEST);
+                    }
 
                     if (hoursSc < 0 || minsSc < 0 || minsSc >= 60) {
                         return new Response("Duración de escala inválida", Status.BAD_REQUEST);
                     }
                 } catch (NumberFormatException e) {
                     return new Response("Las duraciones de escala deben ser números válidos", Status.BAD_REQUEST);
+                }
+            } else {
+                // Validar que no se hayan proporcionado valores de escala si no hay escala seleccionada
+                if ((hoursScale != null && !hoursScale.trim().isEmpty() && !hoursScale.equals("0"))
+                        || (minsScale != null && !minsScale.trim().isEmpty() && !minsScale.equals("0"))) {
+                    return new Response("No puede especificar duración de escala si no seleccionó una ubicación de escala", Status.BAD_REQUEST);
                 }
             }
 
@@ -149,6 +166,9 @@ public class FlightController {
             if (departure == null || arrival == null) {
                 return new Response("Ubicación no encontrada", Status.NOT_FOUND);
             }
+            if (departure.equals(arrival)) {
+                return new Response("El lugar de salida no puede ser el mismo que el de llegada", Status.BAD_REQUEST);
+            }
 
             // 8. Crear el vuelo
             Flight newFlight;
@@ -161,6 +181,9 @@ public class FlightController {
                 Location scale = locationStorage.getLocationById(scaleLocId);
                 if (scale == null) {
                     return new Response("Ubicación de escala no encontrada", Status.NOT_FOUND);
+                }
+                if (scale.equals(departure) || scale.equals(arrival)) {
+                    return new Response("La ubicación de escala no puede ser igual al origen o destino", Status.BAD_REQUEST);
                 }
 
                 newFlight = new Flight(
