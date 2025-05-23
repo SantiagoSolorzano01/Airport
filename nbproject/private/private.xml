@@ -4,19 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/Main/Main.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/FlightController.java</file>
             <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/views/AirportFrame.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/storages/PassengerStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/Passenger.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/PassengerController.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/storages/FlightStorage.java</file>
             <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/LocationController.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/storages/LocationStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/Location.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/storages/PlaneStorage.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/Plane.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/PlaneController.java</file>
-            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/Flight.java</file>
+            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/FlightController.java</file>
+            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/PassengerController.java</file>
+            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/views/PanelRound.java</file>
         </group>
     </open-files>
 </project-private>

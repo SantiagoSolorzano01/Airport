@@ -50,6 +50,25 @@ public class AirportFrame extends javax.swing.JFrame {
         loadFlightFormData(); // Cargar IDs al iniciar
         loadFlightIds();
         updateFlightLists();
+        LocationController locationController = new LocationController();
+        // Configuración inicial de los ComboBox
+        List<Location> locationsList = locationController.getAllLocationsSorted();
+
+        // Convertir la lista de Location a un array de Strings (nombres o IDs)
+        String[] locationsArray = locationsList.stream()
+                .map(Location::getAirportId) // o .map(Location::getName) según lo que quieras mostrar
+                .toArray(String[]::new);
+
+        // ComboBox de salida y llegada con modelos independientes
+        FlightRegistration_ChooseDepartureLocation.setModel(new DefaultComboBoxModel<>(locationsArray));
+        FlightRegistration_ChooseArrivalLocation.setModel(new DefaultComboBoxModel<>(locationsArray));
+
+        // ComboBox de escala con opción nula
+        String[] locationsWithNull = new String[locationsArray.length + 1];
+        locationsWithNull[0] = ""; // o null si prefieres
+        System.arraycopy(locationsArray, 0, locationsWithNull, 1, locationsArray.length);
+        FlightRegistration_ChooseScaleLocation.setModel(new DefaultComboBoxModel<>(locationsWithNull));
+
         PassengerController controller = new PassengerController();
         this.passengers = (ArrayList<Passenger>) controller.getAllPassengersSorted();
         this.planes = new ArrayList<>();
@@ -1490,6 +1509,7 @@ public class AirportFrame extends javax.swing.JFrame {
             List<Passenger> sortedPassengers = controller.getAllPassengersSorted();
             // Actualizar el JComboBox
             updatePassengerComboBox(sortedPassengers);
+            clearPassengerRegistrationForm();
 
             try {
                 // DEBUG: Verificar que se guardó en JSON
@@ -1502,7 +1522,7 @@ public class AirportFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_PassangerRegistration_RegisterButtonActionPerformed
-    
+
     private void updatePassengerComboBox(List<Passenger> passengers) {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         model.addElement("Selecciona un pasajero"); // <-- Esto va SIEMPRE primero
@@ -1647,8 +1667,8 @@ public class AirportFrame extends javax.swing.JFrame {
         try {
             FlightController controller = new FlightController();
 
-            // Obtener los valores seleccionados
-            String scaleLocId = (FlightRegistration_ChooseScaleLocation.getSelectedIndex() >= 0)
+            // Obtener los valores seleccionados - ahora maneja correctamente el valor nulo
+            String scaleLocId = (FlightRegistration_ChooseScaleLocation.getSelectedItem() != null)
                     ? FlightRegistration_ChooseScaleLocation.getSelectedItem().toString() : null;
 
             Response response = controller.registerFlight(
@@ -1674,9 +1694,8 @@ public class AirportFrame extends javax.swing.JFrame {
                 Flight newFlight = (Flight) response.getObject();
                 AddToFlight_ChooseFlight.addItem(newFlight.getId());
                 clearFlightRegistrationForm();
-                updateFlightLists(); // Actualizar las listas ordenadas
+                updateFlightLists();
 
-                // Corrección: proteger acceso a la escala
                 String scaleId = (newFlight.getScaleLocation() != null)
                         ? newFlight.getScaleLocation().getAirportId()
                         : "Sin escala";
@@ -1901,21 +1920,43 @@ public class AirportFrame extends javax.swing.JFrame {
         ShowAllFlights_RefreshButtonActionPerformed(null);
     }
     private void ShowMyFlights_RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowMyFlights_RefreshButtonActionPerformed
-        // TODO add your handling code here:
-        long passengerId = Long.parseLong(Administration_SelectUser.getItemAt(Administration_SelectUser.getSelectedIndex()));
+        try {
+            // Obtener el ID del pasajero seleccionado
+            String passengerIdStr = Administration_SelectUser.getItemAt(Administration_SelectUser.getSelectedIndex()).toString();
 
-        Passenger passenger = null;
-        for (Passenger p : this.passengers) {
-            if (p.getId() == passengerId) {
-                passenger = p;
+            // Crear controlador y obtener respuesta
+            PassengerController controller = new PassengerController();
+            Response response = controller.getPassengerFlights(passengerIdStr);
+
+            // Manejar la respuesta del controlador
+            if (response.getStatus() == Status.OK) {
+                // Mostrar los vuelos en la tabla
+                DefaultTableModel model = (DefaultTableModel) ShowMyFlights_Table.getModel();
+                model.setRowCount(0);
+
+                @SuppressWarnings("unchecked")
+                List<Flight> flights = (List<Flight>) response.getObject();
+
+                if (flights.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "El pasajero no tiene vuelos registrados",
+                            "Información", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    for (Flight flight : flights) {
+                        model.addRow(new Object[]{
+                            flight.getId(),
+                            flight.getDepartureDate(),
+                            flight.calculateArrivalDate()
+                        });
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, response.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
-
-        ArrayList<Flight> flights = passenger.getFlights();
-        DefaultTableModel model = (DefaultTableModel) ShowMyFlights_Table.getModel();
-        model.setRowCount(0);
-        for (Flight flight : flights) {
-            model.addRow(new Object[]{flight.getId(), flight.getDepartureDate(), flight.calculateArrivalDate()});
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }//GEN-LAST:event_ShowMyFlights_RefreshButtonActionPerformed
 
