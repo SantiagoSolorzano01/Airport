@@ -6,7 +6,9 @@ package airport.controllers;
 
 import airport.controllers.utils.Response;
 import airport.controllers.utils.Status;
+import airport.models.Flight;
 import airport.models.Passenger;
+import airport.models.storages.FlightStorage;
 import airport.models.storages.PassengerStorage;
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -243,6 +245,68 @@ public class PassengerController {
 
         } catch (Exception e) {
             return new Response("Error inesperado: " + e.getMessage(), Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public Response addPassengerToFlight(String passengerIdText, String flightId) {
+        try {
+            // Validación de campos vacíos
+            if (passengerIdText == null || passengerIdText.trim().isEmpty()
+                    || flightId == null || flightId.trim().isEmpty()) {
+                return new Response("El ID del pasajero y el ID del vuelo son obligatorios.", Status.BAD_REQUEST);
+            }
+
+            // Validación del ID del pasajero
+            long passengerId;
+            try {
+                passengerId = Long.parseLong(passengerIdText.trim());
+                if (passengerId <= 0) {
+                    return new Response("El ID del pasajero debe ser un número positivo.", Status.BAD_REQUEST);
+                }
+            } catch (NumberFormatException e) {
+                return new Response("ID de pasajero inválido.", Status.BAD_REQUEST);
+            }
+
+            // Validación del ID del vuelo
+            if (flightId.trim().length() != 6) {
+                return new Response("El ID del vuelo debe tener exactamente 6 caracteres.", Status.BAD_REQUEST);
+            }
+
+            // Buscar pasajero
+            Passenger passenger = passengerStorage.getPassengerById(passengerId);
+            if (passenger == null) {
+                return new Response("No se encontró el pasajero con ese ID.", Status.NOT_FOUND);
+            }
+
+            // Buscar vuelo (asumiendo que tienes un FlightStorage similar)
+            Flight flight = FlightStorage.getInstance().getFlightById(flightId.trim());
+            if (flight == null) {
+                return new Response("No se encontró el vuelo con ese ID.", Status.NOT_FOUND);
+            }
+
+            // Verificar si el pasajero ya está en el vuelo
+            if (passenger.getFlights().contains(flight)) {
+                return new Response("El pasajero ya está registrado en este vuelo.", Status.BAD_REQUEST);
+            }
+
+            // Verificar capacidad del vuelo (si aplica)
+            if (flight.getPassengers().size() >= flight.getPlane().getMaxCapacity()) {
+                return new Response("El vuelo ha alcanzado su capacidad máxima.", Status.BAD_REQUEST);
+            }
+
+            // Agregar pasajero al vuelo y viceversa
+            passenger.addFlight(flight);
+            flight.addPassenger(passenger);
+
+            // Actualizar en el almacenamiento
+            passengerStorage.updatePassenger(passenger);
+            FlightStorage.getInstance().updateFlight(flight);
+
+            return new Response("Pasajero agregado al vuelo exitosamente.", Status.OK, passenger);
+
+        } catch (Exception ex) {
+            return new Response("Error inesperado al agregar pasajero al vuelo: " + ex.getMessage(),
+                    Status.INTERNAL_SERVER_ERROR);
         }
     }
 

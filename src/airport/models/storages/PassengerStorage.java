@@ -60,10 +60,11 @@ public class PassengerStorage {
         }
         return passengers;
     }
+
     private void sortPassengersById() {
         passengers.sort(Comparator.comparingLong(Passenger::getId));
     }
-    
+
     public Passenger getPassengerById(long id) {
         return passengers.stream()
                 .filter(p -> p.getId() == id)
@@ -87,9 +88,38 @@ public class PassengerStorage {
             return false;
         }
     }
+
     // Método público para obtener pasajeros ordenados (opcional)
     public List<Passenger> getAllPassengersSortedById() {
         sortPassengersById();
         return new ArrayList<>(passengers);
+    }
+
+    public boolean updatePassenger(Passenger updatedPassenger) {
+        try {
+            // Buscar el pasajero existente por ID
+            Passenger existingPassenger = getPassengerById(updatedPassenger.getId());
+
+            if (existingPassenger == null) {
+                System.err.println("No se encontró el pasajero con ID: " + updatedPassenger.getId());
+                return false;
+            }
+
+            // Actualizar todos los campos del pasajero existente
+            existingPassenger.setFirstname(updatedPassenger.getFirstname());
+            existingPassenger.setLastname(updatedPassenger.getLastname());
+            existingPassenger.setBirthDate(updatedPassenger.getBirthDate());
+            existingPassenger.setCountryPhoneCode(updatedPassenger.getCountryPhoneCode());
+            existingPassenger.setPhone(updatedPassenger.getPhone());
+            existingPassenger.setCountry(updatedPassenger.getCountry());
+
+            System.out.println("Pasajero actualizado: " + updatedPassenger.getFirstname()
+                    + " con ID: " + updatedPassenger.getId());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Error al actualizar pasajero: " + e.getMessage());
+            return false;
+        }
     }
 }
