@@ -1490,8 +1490,6 @@ public class AirportFrame extends javax.swing.JFrame {
             List<Passenger> sortedPassengers = controller.getAllPassengersSorted();
             // Actualizar el JComboBox
             updatePassengerComboBox(sortedPassengers);
-            this.Administration_SelectUser.addItem("" + newPassenger.getId());
-            clearPassengerRegistrationForm();
 
             try {
                 // DEBUG: Verificar que se guardó en JSON
@@ -1504,12 +1502,15 @@ public class AirportFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_PassangerRegistration_RegisterButtonActionPerformed
+    
     private void updatePassengerComboBox(List<Passenger> passengers) {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        model.addElement("Selecciona un pasajero"); // <-- Esto va SIEMPRE primero
         for (Passenger p : passengers) {
             model.addElement(String.valueOf(p.getId()));
         }
         this.Administration_SelectUser.setModel(model);
+        this.Administration_SelectUser.setSelectedIndex(0); // Selecciona siempre el "nulo"
     }
 
     private void clearPassengerRegistrationForm() {
