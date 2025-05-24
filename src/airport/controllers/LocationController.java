@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package airport.controllers;
 
 import airport.controllers.utils.Response;
@@ -9,6 +5,7 @@ import airport.controllers.utils.Status;
 import airport.models.Location;
 import airport.models.storages.LocationStorage;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  *
@@ -85,8 +82,13 @@ public class LocationController {
         }
     }
 
-    // Método para obtener todas las ubicaciones ordenadas
+    // Método para obtener todas las ubicaciones ordenadas y retornar clones (Prototype)
     public List<Location> getAllLocationsSorted() {
-        return locationStorage.getAllLocations(); // Ya están ordenadas
+        List<Location> originals = locationStorage.getAllLocations();
+        List<Location> clones = new ArrayList<>();
+        for (Location l : originals) {
+            clones.add(l.clone());
+        }
+        return clones;
     }
 }

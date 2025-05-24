@@ -1,10 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package airport.models;
 
-import airport.models.Flight;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -13,8 +8,8 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class Passenger {
-    
+public class Passenger implements Cloneable {
+
     private final long id;
     private String firstname;
     private String lastname;
@@ -110,5 +105,16 @@ public class Passenger {
     public int getNumFlights() {
         return flights.size();
     }
-    
+
+    @Override
+    public Passenger clone() {
+        try {
+            Passenger copy = (Passenger) super.clone();
+            // Profundiza la copia de la lista, pero no de los vuelos (solo referencias)
+            copy.flights = new ArrayList<>(this.flights);
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

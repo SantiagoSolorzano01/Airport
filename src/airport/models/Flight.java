@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package airport.models;
 
 import java.time.LocalDateTime;
@@ -11,7 +7,7 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class Flight {
+public class Flight implements Cloneable {
 
     private final String id;
     private ArrayList<Passenger> passengers;
@@ -117,5 +113,16 @@ public class Flight {
 
     public ArrayList<Passenger> getPassengers() {
         return passengers;
+    }
+
+    @Override
+    public Flight clone() {
+        try {
+            Flight copy = (Flight) super.clone();
+            copy.passengers = new ArrayList<>(this.passengers);
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

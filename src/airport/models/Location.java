@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package airport.models;
 
 import airport.models.storages.FlightStorage;
@@ -12,7 +8,7 @@ import java.util.List;
  *
  * @author edangulo
  */
-public class Location {
+public class Location implements Cloneable {
     
     private final String airportId;
     private String airportName;
@@ -29,6 +25,7 @@ public class Location {
         this.airportLatitude = airportLatitude;
         this.airportLongitude = airportLongitude;
     }
+
     public String getAirportId() {
         return airportId;
     }
@@ -53,7 +50,7 @@ public class Location {
         return airportLongitude;
     }
     
-        // Métodos para obtener vuelos
+    // Métodos para obtener vuelos
     public List<Flight> getDepartureFlights() throws Exception {
         List<Flight> departureFlights = new ArrayList<>();
         for (Flight flight : FlightStorage.getInstance().getAllFlights()) {
@@ -80,5 +77,14 @@ public class Location {
         allFlights.addAll(getDepartureFlights());
         allFlights.addAll(getArrivalFlights());
         return allFlights;
+    }
+
+    @Override
+    public Location clone() {
+        try {
+            return (Location) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

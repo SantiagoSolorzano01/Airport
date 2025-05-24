@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package airport.controllers;
 
 import airport.controllers.utils.Response;
@@ -9,6 +5,7 @@ import airport.controllers.utils.Status;
 import airport.models.Plane;
 import airport.models.storages.PlaneStorage;
 import java.util.List;
+import java.util.ArrayList;
 
 public class PlaneController {
 
@@ -66,8 +63,13 @@ public class PlaneController {
         }
     }
 
-    // Método para obtener todos los aviones ordenados
+    // Método para obtener todos los aviones ordenados y devolver clones (Prototype)
     public List<Plane> getAllPlanesSorted() {
-        return planeStorage.getAllPlanes(); // Ya están ordenados
+        List<Plane> originals = planeStorage.getAllPlanes();
+        List<Plane> clones = new ArrayList<>();
+        for (Plane p : originals) {
+            clones.add(p.clone());
+        }
+        return clones;
     }
 }
