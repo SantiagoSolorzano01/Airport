@@ -1,0 +1,27 @@
+[33m86ddd1b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Poniendo modelo prototype
+[33mdf4fb02[m Ya todo verificado
+[33mb248ee2[m Correccion de ComboBox
+[33m2d3ce65[m mayoria de verificaciones
+[33m2f8f7f9[m Arreglo problema escala
+[33mc3a2d39[m Cosa flight
+[33m8dad8cf[m listas ordenadas y otras verificaciones
+[33mea789fc[m Correcion error
+[33m8acb9cb[m Verificacion del id de aviones, movida de PanelRound
+[33mbfebbea[m Verificacion de registrar avion
+[33m63a2053[m Verificacion de update passeger
+[33mb60e016[m agregan vuelos y los demas, se muestran aviones y los demas, y se resatrasan vuelos
+[33ma44895b[m Prueba
+[33m84c4340[m Verifica las entradas al crear vuelos, pasajeros, locations, y aviones
+[33m1c390ce[m lectura de archivos (creo que faltan algunas cosas)
+[33m7b0cb20[m Lectura de archivos, faltan 2
+[33macfe98a[m Variables names changed
+[33m12a2872[m Feat: Added JSON library to project
+[33m402f70e[m feat: i dont know what i can put here
+[33m4044f5e[m Feat: Added almost all functionalities
+[33madf1eec[m feat: GUI finish
+[33m1aac796[m GUI Update
+[33m5813a8e[m Feat: Added relational attributes in Flight, Passenger and Plane
+[33m47e6e75[m Feat: Modified Flight and Plane attributes
+[33m81c648f[m Feat: Added some attributes to the classes
+[33m72390fd[m Chore: Create README.md
+[33mb55ff0c[m Init: First commit
