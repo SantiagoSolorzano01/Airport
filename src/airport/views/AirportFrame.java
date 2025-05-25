@@ -68,13 +68,20 @@ public class AirportFrame extends javax.swing.JFrame {
         locationsWithNull[0] = ""; // o null si prefieres
         System.arraycopy(locationsArray, 0, locationsWithNull, 1, locationsArray.length);
         FlightRegistration_ChooseScaleLocation.setModel(new DefaultComboBoxModel<>(locationsWithNull));
-
+        loadPlanesIntoComboBox();
         PassengerController controller = new PassengerController();
         this.passengers = (ArrayList<Passenger>) controller.getAllPassengersSorted();
-        this.planes = new ArrayList<>();
-        this.locations = new ArrayList<>();
+        PlaneController controllerP = new PlaneController();
+        this.planes = (ArrayList<Plane>) controllerP.getAllPlanesSorted();
+        LocationController controllerL = new LocationController();
+        this.locations = (ArrayList<Location>) controllerL.getAllLocationsSorted();
         FlightController controllerF = new FlightController();
         this.flights = (ArrayList<Flight>) controllerF.getAllFlightsSorted();
+
+        // Obtener todos los IDs ordenados
+        List<Passenger> sortedPassengers = controller.getAllPassengersSorted();
+        // Actualizar el JComboBox
+        updatePassengerComboBox(sortedPassengers);
 
         this.setBackground(new Color(0, 0, 0, 0));
         this.setLocationRelativeTo(null);
@@ -1569,6 +1576,7 @@ public class AirportFrame extends javax.swing.JFrame {
                 clearAirplaneRegistrationForm();
                 List<Plane> sortedPlanes = controller.getAllPlanesSorted();
                 updatePlaneComboBox(sortedPlanes);
+                loadPlanesIntoComboBox();
             } else {
                 JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -1667,13 +1675,17 @@ public class AirportFrame extends javax.swing.JFrame {
         try {
             FlightController controller = new FlightController();
 
+            // Obtener el avión seleccionado - manejo seguro de nulos
+            Object selectedPlane = FlightRegistration_ChoosePlane.getSelectedItem();
+            String planeId = (selectedPlane != null) ? selectedPlane.toString() : null;
+
             // Obtener los valores seleccionados - ahora maneja correctamente el valor nulo
             String scaleLocId = (FlightRegistration_ChooseScaleLocation.getSelectedItem() != null)
                     ? FlightRegistration_ChooseScaleLocation.getSelectedItem().toString() : null;
 
             Response response = controller.registerFlight(
                     FlightRegistration_IdTextField.getText().trim(),
-                    FlightRegistration_ChoosePlane.getSelectedItem().toString(),
+                    planeId,
                     FlightRegistration_ChooseDepartureLocation.getSelectedItem().toString(),
                     FlightRegistration_ChooseArrivalLocation.getSelectedItem().toString(),
                     scaleLocId,
@@ -1714,6 +1726,45 @@ public class AirportFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }//GEN-LAST:event_FlightRegistration_CreateButtonActionPerformed
+
+    public void loadPlanesIntoComboBox() {
+        try {
+            PlaneController controller = new PlaneController();
+            List<Plane> planes = controller.getAllPlanesSorted();
+
+            // Guardar la selección actual
+            Object selectedItem = FlightRegistration_ChoosePlane.getSelectedItem();
+
+            // Limpiar el combobox
+            FlightRegistration_ChoosePlane.removeAllItems();
+
+            // Agregar "Seleccione un avión" como primera opción (opcional)
+            FlightRegistration_ChoosePlane.addItem("Seleccione un avión");
+
+            // Agregar los aviones
+            for (Plane plane : planes) {
+                FlightRegistration_ChoosePlane.addItem(plane.getId());
+            }
+
+            // Restaurar la selección si aún existe
+            if (selectedItem != null) {
+                for (int i = 0; i < FlightRegistration_ChoosePlane.getItemCount(); i++) {
+                    if (FlightRegistration_ChoosePlane.getItemAt(i).equals(selectedItem)) {
+                        FlightRegistration_ChoosePlane.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            } else {
+                FlightRegistration_ChoosePlane.setSelectedIndex(0); // Seleccionar el primero
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar aviones: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
     private void updateFlightLists() {
         try {
             FlightController controller = new FlightController();

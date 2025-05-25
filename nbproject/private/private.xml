@@ -9,6 +9,9 @@
             <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/FlightController.java</file>
             <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/PassengerController.java</file>
             <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/views/PanelRound.java</file>
+            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/Passenger.java</file>
+            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/models/storages/PassengerStorage.java</file>
+            <file>file:/C:/Users/Santiago%20Solorzano/Documents/Airport/src/airport/controllers/PlaneController.java</file>
         </group>
     </open-files>
 </project-private>
